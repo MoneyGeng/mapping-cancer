@@ -1,5 +1,5 @@
 # Visualising Cancer in Canada
-## Summary
+### Summary
 **Project 3 - Data Visualisation**
 
   * **Project Title**: Mapping Cancer: Exploring Cancer Prevalence in Canada
