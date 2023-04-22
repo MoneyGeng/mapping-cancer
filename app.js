@@ -22,17 +22,21 @@ d3.json("Resources/provincial_data.json").then(function (data) {
       selectElement.appendChild(optionElement);  
     };
 })
-  
+
 d3.selectAll("onchange").on("change", optionChanged);
 
 // Defining the optionChanged() function
+let feedinStyle = []
 function optionChanged() {
     let dropdownMenu = d3.select("#selDataset");
     // Assign the value of the dropdown menu option to a variable
     let dataset = dropdownMenu.property("value");
     // Initialize an empty array for the country's data
     let selection = allData.filter(prov => prov.Cancer_type== dataset);
-            console.log(selection)
+    for (let i = 0; i < selection.length; i++) {
+        feedinStyle.push(selection[i].Both_sexes);
+    }
+console.log(feedinStyle)
 
     // for (let i = 0; i < uniqueCancerTypes.length; i++) {
     //     for (let j = 0; j < allData.length; j++) {
@@ -48,17 +52,44 @@ function optionChanged() {
 //}
 
   // Load the GeoJSON data.
-let geoData = "https://data.opendatasoft.com/api/records/1.0/search/?dataset=georef-canada-province%40public&q=&rows=13&facet=prov_name_en&facet=prov_area_code&facet=prov_type"
+let geoData = "Resources/georef-canada-province@public.geojson"
 
-d3.json(geoData).then(function(gData) {
-    console.log(gData.records[0]);
+
+
+var breaks = [-Infinity, 399, 642, 933.2, 2089.8, Infinity];
+var colors = ["#fef0d9", "#fdcc8a", "#fc8d59", "#e34a33", "#b30000"];
+
+function getColor(d) {
+    for(var i = 0; i < breaks.length; i++) {
+        if(d > breaks[i] && d <= breaks[i+1]) {
+            return colors[i];
+        }        
+    }
+}
+
+      function style(feature) {
+        return {
+            fillColor: getColor(feedinStyle),
+            weight: 0.5,
+            opacity: 1,
+            color: "black",
+            fillOpacity: 0.7
+        };
+    }
+
+
+    d3.json(geoData).then(function(gData) {
+        console.log(gData.features[0].properties.prov_name_en[0]);
+        var geojson = L.geoJSON(gData, {
+            style: style
+          }).addTo(myMap);
 });
 
 
 // Creating the map object
 var myMap = L.map("map", {
-    center: [27.96044, -82.30695],
-    zoom: 7
+    center: [62.2270, -105.3809],
+    zoom: 3
   });
   
   // Adding the tile layer
