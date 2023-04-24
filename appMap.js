@@ -30,16 +30,18 @@ var oldLayer;
 var newLayer;
 function init() {
       function style(feature1) {
-        const provinceData2 = allData.find(d => d.Province_full === feature1.properties.prov_name_en[0]);
+        const provinceData = allData.find(d => d.Province_full === feature1.properties.prov_name_en[0]);
+        if (!isNaN(provinceData)) {
+        console.log(provinceData)}
         let color = '#cccccc';
-          if (provinceData2) {
-            const value = parseFloat(provinceData2.Both_sexes);
+          if (provinceData) {
+            const value = parseFloat(provinceData.Both_sexes);
             if (!isNaN(value)) {
-              color = value > 10000 ? '#b30000' :
-                      value > 5000 ? '#e34a33' :
-                      value > 2500 ? '#fc8d59' :
-                      value > 1000 ? '#fdcc8a' :
-                      value > 500 ? '#fef0d9' :
+              color = value > 10000 ? '#800000' :
+                      value > 5000 ? '#b30000' :
+                      value > 2500 ? '#e34a33' :
+                      value > 1000 ? '#fc8d59' :
+                      value > 500 ? '#fdcc8a' :
                       '#ffffcc';
             }
           }
@@ -80,8 +82,7 @@ function optionChanged() {
   let dataset = dropdownMenu.property("value");
   let selection = allData.filter(prov => prov.Cancer_type == dataset);
 
-  let forLegend = []
-  let provinceData2;
+  
   const ontarioValue = selection.find(d => d.Province_full == "Ontario")
   forLegend.push(parseInt(ontarioValue.Both_sexes))
   console.log(forLegend)
@@ -89,32 +90,20 @@ function optionChanged() {
   function style(feature2) {
     for (let i = 0; i < selection.length; i++) {
         if (dataset == selection[i].Cancer_type) {
-            provinceData2 = selection.find(d => d.Province_full === feature2.properties.prov_name_en[0]);
-        }}
+            const provinceData2 = selection.find(d => d.Province_full === feature2.properties.prov_name_en[0]);
+            
         let color = '#cccccc';
           if (provinceData2) {
             const value = parseInt(provinceData2.Both_sexes);
-            if (forLegend[0] > 12000) {
-              legend1()
-              if (!isNaN(value)) {
-                color = value > 10000 ? '#b30000' :
-                        value > 5000 ? '#e34a33' :
-                        value > 2500 ? '#fc8d59' :
-                        value > 1000 ? '#fdcc8a' :
-                        value > 500 ? '#fef0d9' :
-                        '#ffffcc';
-              }
-              
-            } else {
-              if (!isNaN(value)) {
-                color = value > 5000 ? 'blue' :
-                        value > 2500 ? '#e34a33' :
-                        value > 1000 ? '#fc8d59' :
-                        value > 500 ? '#fdcc8a' :
-                        value > 100 ? '#fef0d9' :
-                        '#ffffcc';
+            
+            if (!isNaN(value)) {
+              color = value > 10000 ? '#800000' :
+                      value > 5000 ? '#b30000' :
+                      value > 2500 ? '#e34a33' :
+                      value > 1000 ? '#fc8d59' :
+                      value > 500 ? '#fdcc8a' :
+                      '#ffffcc';
             }
-          }
           }
         return {
             fillColor: color,
@@ -124,8 +113,8 @@ function optionChanged() {
             fillOpacity: 0.7
         };
         }   
-  
-
+    }
+}
 
 function applyOnEachFeature (feature, layer) {
     for (let i = 0; i < selection.length; i++) {
@@ -136,15 +125,14 @@ function applyOnEachFeature (feature, layer) {
     }
   
 
-d3.json(geoData).then(function(gData) {
-    newLayer = L.geoJSON(gData, {
-        style: style,
-        onEachFeature: applyOnEachFeature
-      }).addTo(myMap)
-    }
-    )
     myMap.removeLayer(oldLayer)
-    oldLayer = newLayer.addTo(myMap)
+    d3.json(geoData).then(function(gData) {
+      oldLayer = L.geoJSON(gData, {
+          style: style,
+          onEachFeature: applyOnEachFeature
+        }).addTo(myMap)
+      }
+      )
 }
 
 // Creating map
@@ -158,7 +146,7 @@ var myMap = L.map("map", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(myMap);
 
-  function legend1() {
+  
   var legend = L.control({position: 'bottomright'});
     
   legend.onAdd = function () {
@@ -174,12 +162,9 @@ var myMap = L.map("map", {
     '<i style="background-color: #fc8d59"></i>1000 - 2500<br>' +
     '<i style="background-color: #e34a33"></i>2500 - 5000<br>' +
     '<i style="background-color: #b30000"></i>5000 - 10000<br>' +
-    '<i style="background-color: #660000"></i>10000+<br>';
+    '<i style="background-color: #800000"></i>10000+<br>';
   }
     return div;
   };
   legend.addTo(myMap);
-}
-
-
 init()
