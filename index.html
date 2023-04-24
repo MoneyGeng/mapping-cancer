@@ -14,7 +14,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12 jumbotron text-center">
-        <h1>Prevalence of Cancer Across Canada Dashboard</h1>
+        <h1>Cancer prevalance across Canada Dashboard</h1>
         <p>Use the interactive charts below to explore the dataset</p>
       </div>
     </div>
@@ -23,14 +23,14 @@
         <h5>Cancer Types:</h5>
         <select id="selDataset" onchange="optionChanged(this.value)"></select>
         <!-- The div where we'll insert our map -->
-        <div id="map" style="width: 600px; height: 400px;"></div>
+        <div id="map" style="width: 800px; height: 600px;"></div>
       </div>
-      <div class="well">
+      <!-- <div class="well">
         <h5>Province/Territory:</h5>
-        <select id="selProvince" onchange="provinceChanged(this.value)"></select>
+        <select id="selProvince" onchange="optionChanged(this.value)"></select> -->
         <!-- The div where we'll insert our barchart -->
-        <div id="barchart" style="width: 600px; height: 400px;"></div>
-      </div>
+        <!-- <div id="barchart" style="width: 600px; height: 400px;"></div>
+      </div> -->
 
 
 
@@ -53,7 +53,11 @@
       <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
       <!-- Our JavaScript -->
-      <script src="app.js"></script>
+      <!-- <script src="app.js"></script> -->
+      <script src="appMap.js"></script>
+
+      <!-- Our CSS -->
+      <link rel="stylesheet" type="text/css" href="css/style.css">
 
 </body>
 

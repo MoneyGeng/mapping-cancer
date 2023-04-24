@@ -26,9 +26,9 @@ d3.json("Resources/provincial_data.json").then(function (data) {
     };
 })
 
-// For the initial/default map 
+var oldLayer;
+var newLayer;
 function init() {
-
       function style(feature1) {
         const provinceData2 = allData.find(d => d.Province_full === feature1.properties.prov_name_en[0]);
         let color = '#cccccc';
@@ -37,7 +37,7 @@ function init() {
             if (!isNaN(value)) {
               color = value > 10000 ? '#b30000' :
                       value > 5000 ? '#e34a33' :
-                      value > 2500 ? 'fc8d59' :
+                      value > 2500 ? '#fc8d59' :
                       value > 1000 ? '#fdcc8a' :
                       value > 500 ? '#fef0d9' :
                       '#ffffcc';
@@ -61,7 +61,7 @@ function init() {
         }
 
     d3.json(geoData).then(function(gData) {
-        L.geoJSON(gData, {
+        oldLayer = L.geoJSON(gData, {
             style: style,
             onEachFeature: applyOnEachFeature
           }).addTo(myMap);
@@ -70,34 +70,51 @@ function init() {
 }
 
 
-
+let forLegend = []
 d3.selectAll("onchange").on("change", optionChanged);
 
-// Defining the optionChanged() function and updating the map
+// Defining the optionChanged() function
 function optionChanged() {
 
   let dropdownMenu = d3.select("#selDataset");
   let dataset = dropdownMenu.property("value");
   let selection = allData.filter(prov => prov.Cancer_type == dataset);
 
-console.log(selection);
-
+  let forLegend = []
+  let provinceData2;
+  const ontarioValue = selection.find(d => d.Province_full == "Ontario")
+  forLegend.push(parseInt(ontarioValue.Both_sexes))
+  console.log(forLegend)
+  
   function style(feature2) {
     for (let i = 0; i < selection.length; i++) {
         if (dataset == selection[i].Cancer_type) {
-            const provinceData2 = selection.find(d => d.Province_full === feature2.properties.prov_name_en[0]);
+            provinceData2 = selection.find(d => d.Province_full === feature2.properties.prov_name_en[0]);
+        }}
         let color = '#cccccc';
           if (provinceData2) {
-            const value = parseFloat(provinceData2.Both_sexes);
-            console.log(value)
-            if (!isNaN(value)) {
-              color = value > 10000 ? '#b30000' :
-                      value > 5000 ? '#e34a33' :
-                      value > 2500 ? 'fc8d59' :
-                      value > 1000 ? '#fdcc8a' :
-                      value > 500 ? '#fef0d9' :
-                      '#ffffcc';
+            const value = parseInt(provinceData2.Both_sexes);
+            if (forLegend[0] > 12000) {
+              legend1()
+              if (!isNaN(value)) {
+                color = value > 10000 ? '#b30000' :
+                        value > 5000 ? '#e34a33' :
+                        value > 2500 ? '#fc8d59' :
+                        value > 1000 ? '#fdcc8a' :
+                        value > 500 ? '#fef0d9' :
+                        '#ffffcc';
+              }
+              
+            } else {
+              if (!isNaN(value)) {
+                color = value > 5000 ? 'blue' :
+                        value > 2500 ? '#e34a33' :
+                        value > 1000 ? '#fc8d59' :
+                        value > 500 ? '#fdcc8a' :
+                        value > 100 ? '#fef0d9' :
+                        '#ffffcc';
             }
+          }
           }
         return {
             fillColor: color,
@@ -107,33 +124,32 @@ console.log(selection);
             fillOpacity: 0.7
         };
         }   
-    }
-}
+  
+
 
 function applyOnEachFeature (feature, layer) {
-    for (let i = 0; i < allData.length; i++) {
-        if (feature.properties.prov_name_en[0] == allData[i].Province_full) {
-            layer.bindPopup(`<b>Province: </b> ${feature.properties.prov_name_en[0]} <p> <b> Prevalence: </b> ${allData[i].Both_sexes}`);   
+    for (let i = 0; i < selection.length; i++) {
+        if (feature.properties.prov_name_en[0] == selection[i].Province_full) {
+            layer.bindPopup(`<b>Province: </b> ${feature.properties.prov_name_en[0]} <p> <b> Prevalence: </b> ${selection[i].Both_sexes}`);   
+          }
         }
     }
-    }
+  
 
 d3.json(geoData).then(function(gData) {
     newLayer = L.geoJSON(gData, {
         style: style,
         onEachFeature: applyOnEachFeature
       }).addTo(myMap)
-      //myMap.remove(newLayer)
-      //newLayer
     }
-    
     )
-    
+    myMap.removeLayer(oldLayer)
+    oldLayer = newLayer.addTo(myMap)
 }
 
-// Creating the map object
+// Creating map
 var myMap = L.map("map", {
-    center: [62.2270, -105.3809],
+    center: [62.2270, -90.3809],
     zoom: 3
   });
   
@@ -141,6 +157,29 @@ var myMap = L.map("map", {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(myMap);
+
+  function legend1() {
+  var legend = L.control({position: 'bottomright'});
+    
+  legend.onAdd = function () {
+  let div = L.DomUtil.create('div', 'info legend');
+  let ranges = [0, 500, 1000, 2500, 5000, 10000];
+
+
+  for (var i = 0; i < ranges.length; i++) {
+    div.innerHTML =
+    '<b>Legend</b><br>Prevalence of cancer<br>' + 
+    '<i style="background-color: #ffffcc"></i>0 - 500<br>' +
+    '<i style="background-color: #fdcc8a"></i>500 - 1000<br>' +
+    '<i style="background-color: #fc8d59"></i>1000 - 2500<br>' +
+    '<i style="background-color: #e34a33"></i>2500 - 5000<br>' +
+    '<i style="background-color: #b30000"></i>5000 - 10000<br>' +
+    '<i style="background-color: #660000"></i>10000+<br>';
+  }
+    return div;
+  };
+  legend.addTo(myMap);
+}
 
 
 init()
