@@ -1,18 +1,17 @@
-const geoData = "Resources/provincial_data.json";
-
+let cancerType, province, bothSexesData = [];
+var sample = new Array();
 var allData = new Array();
 
-// load json file
-// populate allData
-d3.json(geoData).then(function (data) {
+// Load the GeoJSON data.
+let geoData = "Resources/georef-canada-province@public.geojson"
+
+d3.json("Resources/provincial_data.json").then(function (data) {
   console.log(data)
-  var sample = new Array();
   for (let i = 0; i < data.length; i++) {
     allData.push(data[i])
     sample.push(data[i].Cancer_type)
   }
 
-  // cancer type drop down
   // Mapping out data into arrays
   uniqueCancerTypes = sample.filter((value, index, array) => array.indexOf(value) === index);
   console.log(uniqueCancerTypes)
@@ -27,52 +26,120 @@ d3.json(geoData).then(function (data) {
   };
 })
 
-d3.select("#selDataset").on("change", optionChanged);
+var oldLayer;
+var newLayer;
+function init() {
+  function style(feature1) {
+    const provinceData = allData.find(d => d.Province_full === feature1.properties.prov_name_en[0]);
+    if (!isNaN(provinceData)) {
+      console.log(provinceData)
+    }
+    let color = '#cccccc';
+    if (provinceData) {
+      const value = parseFloat(provinceData.Both_sexes);
+      if (!isNaN(value)) {
+        color = value > 10000 ? '#800000' :
+          value > 5000 ? '#b30000' :
+            value > 2500 ? '#e34a33' :
+              value > 1000 ? '#fc8d59' :
+                value > 500 ? '#fdcc8a' :
+                  '#ffffcc';
+      }
+    }
+    return {
+      fillColor: color,
+      weight: 0.5,
+      opacity: 1,
+      color: "black",
+      fillOpacity: 0.7
+    };
+  }
 
-// Defining the optionChanged() function
-var selectedCancerTypeCountBothSexes = [];
-function optionChanged() {
-  let dropdownMenu = d3.select("#selDataset");
-  // Assign the value of the dropdown menu option to a variable
-  let dataset = dropdownMenu.property("value");
-  // Initialize an empty array for the country's data
-  const selection = allData.filter(prov => prov.Cancer_type == dataset);
-  selectedCancerTypeCountBothSexes = selection.map(obj => obj.Both_sexes);
-  console.log(selectedCancerTypeCountBothSexes)
-}
-
-// Load the GeoJSON data.
-var breaks = [-Infinity, 399, 642, 933.2, 2089.8, Infinity];
-var colors = ["#fef0d9", "#fdcc8a", "#fc8d59", "#e34a33", "#b30000"];
-
-function getColor(d) {
-  for (var i = 0; i < breaks.length; i++) {
-    if (d > breaks[i] && d <= breaks[i + 1]) {
-      return colors[i];
+  function applyOnEachFeature(feature, layer) {
+    for (let i = 0; i < allData.length; i++) {
+      if (feature.properties.prov_name_en[0] == allData[i].Province_full) {
+        layer.bindPopup(`<b>Province: </b> ${feature.properties.prov_name_en[0]} <p> <b> Prevalence: </b> ${allData[i].Both_sexes}`);
+      }
     }
   }
+
+  d3.json(geoData).then(function (gData) {
+    oldLayer = L.geoJSON(gData, {
+      style: style,
+      onEachFeature: applyOnEachFeature
+    }).addTo(myMap);
+  }
+  )
 }
 
-function style(feature) {
-  return {
-    fillColor: getColor(selectedCancerTypeCountBothSexes),
-    weight: 0.5,
-    opacity: 1,
-    color: "black",
-    fillOpacity: 0.7
-  };
+
+let forLegend = []
+d3.selectAll("onchange").on("change", optionChanged);
+
+// Defining the optionChanged() function
+function optionChanged() {
+
+  let dropdownMenu = d3.select("#selDataset");
+  let dataset = dropdownMenu.property("value");
+  let selection = allData.filter(prov => prov.Cancer_type == dataset);
+
+
+  const ontarioValue = selection.find(d => d.Province_full == "Ontario")
+  forLegend.push(parseInt(ontarioValue.Both_sexes))
+  console.log(forLegend)
+
+  function style(feature2) {
+    for (let i = 0; i < selection.length; i++) {
+      if (dataset == selection[i].Cancer_type) {
+        const provinceData2 = selection.find(d => d.Province_full === feature2.properties.prov_name_en[0]);
+
+        let color = '#cccccc';
+        if (provinceData2) {
+          const value = parseInt(provinceData2.Both_sexes);
+
+          if (!isNaN(value)) {
+            color = value > 10000 ? '#800000' :
+              value > 5000 ? '#b30000' :
+                value > 2500 ? '#e34a33' :
+                  value > 1000 ? '#fc8d59' :
+                    value > 500 ? '#fdcc8a' :
+                      '#ffffcc';
+          }
+        }
+        return {
+          fillColor: color,
+          weight: 0.5,
+          opacity: 1,
+          color: "black",
+          fillOpacity: 0.7
+        };
+      }
+    }
+  }
+
+  function applyOnEachFeature(feature, layer) {
+    for (let i = 0; i < selection.length; i++) {
+      if (feature.properties.prov_name_en[0] == selection[i].Province_full) {
+        layer.bindPopup(`<b>Province: </b> ${feature.properties.prov_name_en[0]} <p> <b> Prevalence: </b> ${selection[i].Both_sexes}`);
+      }
+    }
+  }
+
+
+  myMap.removeLayer(oldLayer)
+  d3.json(geoData).then(function (gData) {
+    oldLayer = L.geoJSON(gData, {
+      style: style,
+      onEachFeature: applyOnEachFeature
+    }).addTo(myMap)
+  }
+  )
 }
 
-// Creating the map object
+// Creating map
 var myMap = L.map("map", {
-  center: [62.2270, -105.3809],
+  center: [62.2270, -90.3809],
   zoom: 3
-});
-
-d3.json(geoData).then(function (gData) {
-  var geojson = L.geoJSON(gData, {
-    style: style
-  }).addTo(myMap);
 });
 
 // Adding the tile layer
@@ -81,27 +148,29 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(myMap);
 
 
-// // Create the createMarkers function.
-// function createMarkers(response) {
-//   // Pull the "stations" property from response.data.
-//   let provs = response.data.stations;
-//   // Initialize an array to hold the bike markers.
-//   var bikeMarkers = [];
-//   // Loop through the stations array.
-//     // For each station, create a marker, and bind a popup with the station's name.
-//     for (var i = 0; i < stations.length; i++) {
-//       var station = stations[i];
+var legend = L.control({ position: 'bottomright' });
 
-//     // Add the marker to the bikeMarkers array.
-//     var bikeMarker = L.marker([station.lat, station.lon]).bindPopup("<h3>" + station.name + "<h3><h3>Capacity: " + station.capacity + "</h3>");
-//   // Create a layer group that's made from the bike markers array, and pass it to the createMap function.
-//     bikeMarkers.push(bikeMarker);
-//     }
+legend.onAdd = function () {
+  let div = L.DomUtil.create('div', 'info legend');
+  let ranges = [0, 500, 1000, 2500, 5000, 10000];
 
-// // Perform an API call to the Citi Bike API to get the station information. Call createMarkers when it completes.
-// const mapLayer = L.layerGroup(bikeMarkers)
-// createMap(mapLayer);
-// }
+
+  for (var i = 0; i < ranges.length; i++) {
+    div.innerHTML =
+      '<b>Legend</b><br>Prevalence of cancer<br>' +
+      '<i style="background-color: #ffffcc"></i>0 - 500<br>' +
+      '<i style="background-color: #fdcc8a"></i>500 - 1000<br>' +
+      '<i style="background-color: #fc8d59"></i>1000 - 2500<br>' +
+      '<i style="background-color: #e34a33"></i>2500 - 5000<br>' +
+      '<i style="background-color: #b30000"></i>5000 - 10000<br>' +
+      '<i style="background-color: #800000"></i>10000+<br>';
+  }
+  return div;
+};
+legend.addTo(myMap);
+init()
+
+
 //////////////////////////////////////////////////////////////////////////////
 // numCancerTypes is used to define how many values are presented in the bar chart
 const numCancerTypes = 10;
@@ -110,7 +179,7 @@ const numCancerTypes = 10;
 var allBarChartData = [];
 
 // load the data
-d3.json(geoData).then(function (data) {
+d3.json("Resources/provincial_data.json").then(function (data) {
   // province drop down
   // (...) : spread operator, spreading the data into an array
   const uniqueProvinces = [...new Set(data.map(prov => prov.Province))];
