@@ -3,9 +3,9 @@ var sample = new Array();
 var allData = new Array();
 
 // Load the GeoJSON data.
-let geoData = "Resources/georef-canada-province@public.geojson"
+// "geoDatUrl" is defined in the global scope from base.html 
 
-d3.json("Resources/provincial_data.json").then(function (data) {
+d3.json(geoDataUrl).then(function (data) {
   console.log(data)
   for (let i = 0; i < data.length; i++) {
     allData.push(data[i])
@@ -62,8 +62,8 @@ function init() {
       }
     }
   }
-
-  d3.json(geoData).then(function (gData) {
+  // "geoRefUrl" is defined in base.html
+  d3.json(geoRefUrl).then(function (gData) {
     oldLayer = L.geoJSON(gData, {
       style: style,
       onEachFeature: applyOnEachFeature
@@ -127,7 +127,7 @@ function optionChanged() {
 
 
   myMap.removeLayer(oldLayer)
-  d3.json(geoData).then(function (gData) {
+  d3.json(geoRefUrl).then(function (gData) {
     oldLayer = L.geoJSON(gData, {
       style: style,
       onEachFeature: applyOnEachFeature
@@ -169,3 +169,78 @@ legend.onAdd = function () {
 };
 legend.addTo(myMap);
 init()
+
+
+//////////////////////////////////////////////////////////////////////////////
+// numCancerTypes is used to define how many values are presented in the bar chart
+const numCancerTypes = 10;
+// store unfiltered provincial_data.json into an empty array
+// populated by d3.json
+var allBarChartData = [];
+
+// load the data
+d3.json(geoDataUrl).then(function (data) {
+  // province drop down
+  // (...) : spread operator, spreading the data into an array
+  const uniqueProvinces = [...new Set(data.map(prov => prov.Province))];
+  // get selProvince dropdown menu select tag
+  const selectElement = document.getElementById("selProvince");
+  // populating dropdown menu with options
+  for (let i = 0; i < uniqueProvinces.length; i++) {
+    const optionElement = document.createElement("option");
+    const optionText = document.createTextNode(uniqueProvinces[i]);
+    optionElement.appendChild(optionText);
+    selectElement.appendChild(optionElement);
+  };
+  // setting all unfiltered bar chart data 
+  allBarChartData = data;
+  console.log(allBarChartData);
+  // build the chart with a default province by getting the first unique province
+  buildChart(uniqueProvinces[0]);
+});
+
+// when the selection changes, change the selected province
+d3.select("#selProvince").on("change", provinceChanged);
+
+function provinceChanged() {
+  // get selected province
+  const selectedProvince = d3.select("#selProvince").property("value");
+  console.log(selectedProvince);
+  // call selectedProvince to the buildChart function
+  buildChart(selectedProvince);
+}
+
+/**
+ * buildChart making a chart
+ * buildChart creates a bar chart representing the top 10 Cancer_type of selectedProvince
+ * @param {string} selectedProvince - filter through each unique province
+ */
+function buildChart(selectedProvince) {
+  let barChartData = allBarChartData;
+  // filter down the data to get the top numCancerTypes for both sexs in the province 
+  // a is greater than b if a.Both_sexes > b.Both_sexes
+  barChartData = barChartData.filter((obj) => obj.Province == selectedProvince);
+  barChartData = barChartData.filter((obj) => obj.Cancer_type !== "All cancers");
+  barChartData.sort((a, b) => b.Both_sexes - a.Both_sexes);
+  barChartData = barChartData.slice(0, numCancerTypes);
+
+  const xValues = barChartData.map((obj, index) => index);
+  const yValues = barChartData.map(obj => obj.Both_sexes);
+  const cancerLabels = barChartData.map(obj => obj.Cancer_type);
+  console.log(xValues, yValues, cancerLabels)
+
+  const barData = [{
+    x: cancerLabels,
+    y: yValues,
+    text: cancerLabels,
+    type: "bar",
+    orientation: "v"
+  }];
+
+  // Create layout for bar chart
+  const barLayout = {
+    title: `Top ${numCancerTypes} Cancers Found by Province`
+  };
+  // plot the barchart 
+  Plotly.newPlot("barchart", barData, barLayout);
+}
