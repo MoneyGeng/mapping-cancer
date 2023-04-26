@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Use this interactive dashboard to explore the Health Canada Cancer dataset">
+    <meta name="keywords"
+        content="javascript, css, d3, html, api, bootstrap, jquery, flask, plotly, songs, plotlyjs, select2, d3js, flask-api, frozen-flask, bootstrap5, bootstrap-icons">
+    <meta name="author" content="Abeda Salsabil, Sumaiya Nathani">
+
+    <title>Cancer Statistics - {% block title %}{% endblock %}</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css"
+        integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+        crossorigin="" />
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
+
+    <!-- Leaflet JavaScript code-->
+    <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"
+        integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
+        crossorigin=""></script>
+    <!-- D3.js   -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Plotly   -->
+    <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.3.slim.min.js"
+        integrity="sha256-ZwqZIVdD3iXNyGHbSYdsmWP//UBokj2FHAxKuSBKDSo=" crossorigin="anonymous"></script>
+
+    <!-- Select 2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script>const geoDataUrl = "{{url_for('geodata')}}";</script>
+
+    <script>const geoRefUrl = "{{url_for('georef')}}";</script>
+
+</head>
+
+<body>
+    <header>
+        <nav id="navbar" class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link {{pages['analysis']}}" aria-current="page"
+                                href="{{ url_for('analysis') }}">Analysis</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{pages['visualization']}}"
+                                href="{{ url_for('visualization') }}">Visualization</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{pages['about']}}" href="{{ url_for('about') }}">About</a>
+                        </li>
+                    </ul>
+                    <a id="github-link" href="https://github.com/MoneyGeng/mapping-cancer" target="_blank"
+                        rel="noreferrer">
+                        <button class="btn" type="submit">
+                            <i class="bi bi-github"></i>
+                        </button>
+                    </a>
+                    <!-- <button id="light-mode" class="btn hide" type="submit">
+                        <i class="bi bi-brightness-high-fill"></i>
+                    </button>
+                    <button id="dark-mode" class="btn" type="submit">
+                        <i class="bi bi-moon-fill"></i>
+                    </button> -->
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            <div class="header text-center">
+                {% block header %}{% endblock %}
+            </div>
+        </div>
+    </header>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+</html>
