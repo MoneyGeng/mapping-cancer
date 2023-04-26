@@ -7,10 +7,24 @@
 {% endblock %}
 
 {% block content %}
+<style type="text/css">
+  .chartBox {
+  width: 550px;
+  height: 550px;
+  background: #ffffff;
+  }
+  #plotarea {
+    width: 1170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+
 <div class="container">
   <div class="row">
     <div class="col-md-12 jumbotron text-center">
-      <h1>Interactive Dashboard</h1>
+      <h1>Cancer prevalance across Canada Dashboard</h1>
       <p>Use the interactive charts below to explore the dataset</p>
     </div>
   </div>
@@ -19,16 +33,20 @@
       <h5>Cancer Types:</h5>
       <select id="selDataset" onchange="optionChanged(this.value)"></select>
       <!-- The div where we'll insert our map -->
-      <div id="map" style="width: 800px; height: 600px;"></div>
+      <div id="map" style="width: 1125px; height: 500px;"></div>
     </div>
-    <div class="well">
-      <h5>Province/Territory:</h5>
-      <select id="selProvince" onchange="provinceChanged(this.value)"></select>
-      <!-- The div where we'll insert our barchart -->
-      <div id="barchart" style="width: 600px; height: 400px;"></div>
+
+    <div class="well" id="plotarea">
+      <div class="chartBox">
+        <h5>Province/Territory:</h5>
+        <select id="selProvince" onchange="provinceChanged(this.value)"></select>
+      <!-- The div where we'll insert our barcharts -->
+        <div id="barchart"></div>
+      </div>
+      <div class="chartBox">
+        <canvas id="comparisonbarchart" style="position: relative;left:-20px; top:180px;"></canvas>
+      </div>
     </div>
-  </div>
-</div>
 
 <script src="{{url_for('static', filename='js/app.js')}}" async></script>
 <!-- <script src="{{ url_for('static', filename='js/summary.js') }}"></script> -->

@@ -197,6 +197,7 @@ d3.json(geoDataUrl).then(function (data) {
   console.log(allBarChartData);
   // build the chart with a default province by getting the first unique province
   buildChart(uniqueProvinces[0]);
+  buildComparisonChart(uniqueProvinces[0])
 });
 
 // when the selection changes, change the selected province
@@ -208,6 +209,7 @@ function provinceChanged() {
   console.log(selectedProvince);
   // call selectedProvince to the buildChart function
   buildChart(selectedProvince);
+  buildComparisonChart(selectedProvince);
 }
 
 /**
@@ -243,4 +245,59 @@ function buildChart(selectedProvince) {
   };
   // plot the barchart 
   Plotly.newPlot("barchart", barData, barLayout);
+}
+
+let barChart;
+function buildComparisonChart(selectedProvince) {
+  let barChartData2 = allBarChartData;
+
+  // filter down the data to get the top numCancerTypes for both sexs in the province 
+  // a is greater than b if a.Both_sexes > b.Both_sexes
+  barChartData2 = barChartData2.filter((obj) => obj.Province == selectedProvince);
+  barChartData2 = barChartData2.filter((obj) => obj.Cancer_type !== "All cancers");
+  barChartData2 = barChartData2.slice(0, numCancerTypes);
+
+  const xValues = barChartData2.map((obj, index) => index);
+  const maleValues = barChartData2.map(obj => obj.Male_2_years);
+  const femaleValues = barChartData2.map(obj => obj.Females_2_years);
+  const cancerLabels = barChartData2.map(obj => obj.Cancer_type);
+console.log(maleValues)
+  let mychart = document.getElementById("comparisonbarchart").getContext('2d');
+
+  data = {
+          labels: cancerLabels,
+          datasets: [
+            {
+              label: 'Males',
+              data: maleValues,
+        },
+        {
+          label: 'Females',
+            data: femaleValues, 
+        }
+      ]
+        }
+    
+    configuration = {
+      type: 'bar',
+      data,
+      options: {
+        indexAxis: 'x',
+        scales: {
+          x: {
+            ticks: {
+              minRotation: 20,
+              crossAlign: 'center'
+            }
+          }
+        }
+      }
+    }
+
+    if (barChart) {
+      barChart.destroy();
+      barChart = new Chart(mychart, configuration);
+    } else {
+      barChart = new Chart(mychart, configuration);
+    }
 }
