@@ -242,8 +242,10 @@ function buildChart(selectedProvince) {
   // Create layout for bar chart
   const barLayout = {
     xaxis: {
-      tickangle: -20
+      tickangle: -20,
+      title: 'Type of Cancer'
     },
+    yaxis: { title: 'Number of Cases' },
     title: `Top ${numCancerTypes} Cancers Found by Province`
   };
   // plot the barchart 
@@ -282,21 +284,26 @@ function buildComparisonChart(selectedProvince) {
   }
 
   configuration = {
+    // create labels for the x and y axis and the title
     type: 'bar',
     data,
     options: {
-      indexAxis: 'x',
       scales: {
-        x: {
-          ticks: {
-            minRotation: 20,
-            crossAlign: 'center'
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Gender'
           }
-        }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Number of Cases'
+          }
+        }]
       }
     }
   }
-
   if (barChart) {
     barChart.destroy();
     barChart = new Chart(mychart, configuration);
