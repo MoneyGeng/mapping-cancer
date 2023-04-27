@@ -241,6 +241,9 @@ function buildChart(selectedProvince) {
 
   // Create layout for bar chart
   const barLayout = {
+    xaxis: {
+      tickangle: -20
+    },
     title: `Top ${numCancerTypes} Cancers Found by Province`
   };
   // plot the barchart 
@@ -261,43 +264,43 @@ function buildComparisonChart(selectedProvince) {
   const maleValues = barChartData2.map(obj => obj.Male_2_years);
   const femaleValues = barChartData2.map(obj => obj.Females_2_years);
   const cancerLabels = barChartData2.map(obj => obj.Cancer_type);
-console.log(maleValues)
+  console.log(maleValues)
   let mychart = document.getElementById("comparisonbarchart").getContext('2d');
 
   data = {
-          labels: cancerLabels,
-          datasets: [
-            {
-              label: 'Males',
-              data: maleValues,
-        },
-        {
-          label: 'Females',
-            data: femaleValues, 
-        }
-      ]
-        }
-    
-    configuration = {
-      type: 'bar',
-      data,
-      options: {
-        indexAxis: 'x',
-        scales: {
-          x: {
-            ticks: {
-              minRotation: 20,
-              crossAlign: 'center'
-            }
+    labels: cancerLabels,
+    datasets: [
+      {
+        label: 'Males',
+        data: maleValues,
+      },
+      {
+        label: 'Females',
+        data: femaleValues,
+      }
+    ]
+  }
+
+  configuration = {
+    type: 'bar',
+    data,
+    options: {
+      indexAxis: 'x',
+      scales: {
+        x: {
+          ticks: {
+            minRotation: 20,
+            crossAlign: 'center'
           }
         }
       }
     }
+  }
 
-    if (barChart) {
-      barChart.destroy();
-      barChart = new Chart(mychart, configuration);
-    } else {
-      barChart = new Chart(mychart, configuration);
-    }
+  if (barChart) {
+    barChart.destroy();
+    barChart = new Chart(mychart, configuration);
+  } else {
+    barChart = new Chart(mychart, configuration);
+  }
 }
