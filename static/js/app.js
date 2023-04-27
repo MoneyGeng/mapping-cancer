@@ -258,7 +258,15 @@ function buildChart(selectedProvince) {
 
   // Create layout for bar chart
   const barLayout = {
-    title: `Top ${numCancerTypes} Cancers Found by Province`
+    title: `Top ${numCancerTypes} Cancers Found by Province`,
+    xaxis: {
+      title: {
+        text: 'Cancer types'}
+      },
+      yaxis: {
+        title: {
+          text: 'Number of people'}
+        }
   };
   // plot the barchart 
   Plotly.newPlot("barchart", barData, barLayout);
@@ -301,6 +309,20 @@ function buildComparisonChart(selectedProvince) {
       type: 'bar',
       data,
       options: {
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: 'Number of people'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Cancer types'
+            }
+          },
+        },     
         plugins: {
           title: {
               display: true,
