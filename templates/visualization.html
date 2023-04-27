@@ -9,10 +9,11 @@
 {% block content %}
 <style type="text/css">
   .chartBox {
-  width: 550px;
-  height: 550px;
-  background: #ffffff;
+    width: 550px;
+    height: 550px;
+    background: #ffffff;
   }
+
   #plotarea {
     width: 1170px;
     display: flex;
@@ -40,7 +41,7 @@
       <div class="chartBox">
         <h5>Province/Territory:</h5>
         <select id="selProvince" onchange="provinceChanged(this.value)"></select>
-      <!-- The div where we'll insert our barcharts -->
+        <!-- The div where we'll insert our barcharts -->
         <div id="barchart"></div>
       </div>
       <div class="chartBox">
@@ -48,6 +49,5 @@
       </div>
     </div>
 
-<script src="{{url_for('static', filename='js/app.js')}}" async></script>
-<!-- <script src="{{ url_for('static', filename='js/summary.js') }}"></script> -->
-{% endblock %}
+    <script src="{{url_for('static', filename='js/app.js')}}" async></script>
+    {% endblock %}
