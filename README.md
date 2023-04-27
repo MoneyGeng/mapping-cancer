@@ -30,6 +30,7 @@ https://portal.gdc.cancer.gov/
 - Plotly
 - Leaflet
 - Chart JS
+- JSON data
 
 
 ## Project 3 Requirements
